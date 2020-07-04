@@ -1,0 +1,6 @@
+{
+  "extends": "oclif",
+  "rules": {
+    "unicorn/explicit-length-check": "ignore"
+  }
+}
