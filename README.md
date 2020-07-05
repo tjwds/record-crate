@@ -29,6 +29,7 @@ USAGE
 # Commands
 <!-- commands -->
 * [`record-crate authorize`](#record-crate-authorize)
+* [`record-crate collide`](#record-crate-collide)
 * [`record-crate elvis-test`](#record-crate-elvis-test)
 * [`record-crate help [COMMAND]`](#record-crate-help-command)
 * [`record-crate move`](#record-crate-move)
@@ -47,6 +48,17 @@ OPTIONS
 ```
 
 _See code: [src/commands/authorize.js](https://github.com/tjwds/record-crate/blob/v1.0.0/src/commands/authorize.js)_
+
+## `record-crate collide`
+
+Displays duplicates which exist across playlists.
+
+```
+USAGE
+  $ record-crate collide
+```
+
+_See code: [src/commands/collide.js](https://github.com/tjwds/record-crate/blob/v1.0.0/src/commands/collide.js)_
 
 ## `record-crate elvis-test`
 

@@ -27,6 +27,12 @@ const getPlaylistTracksWithOffset = async (playlistId, items, offset) => {
       offset ? offset + 100 : 100,
     )
   }
+  const playlistInfo = await api.getPlaylist(playlistId)
+  responseBody.playlistInformation = {
+    name: playlistInfo.body.name,
+    owner: playlistInfo.body.owner.id,
+    playlistId,
+  }
   return responseBody
 }
 
@@ -104,11 +110,53 @@ const removeTracksFromPlaylist = async (playlist, tracks) => {
   })
 }
 
+const playlistCollider = async playlistIds => {
+  const allTracks = {}
+  const duplicateTracks = {}
+
+  return Promise.all(playlistIds.map(playlist =>
+    getPlaylistTracksWithOffset(playlist)
+  )).then(playlistBodies => {
+    playlistBodies.forEach(playlistBody => {
+      playlistBody.body.items.forEach(trackBody => {
+        const track = trackBody.track
+        if (allTracks[track.id]) {
+          if (duplicateTracks[track.id]) {
+            // just append the playlist to the list of playlists
+            duplicateTracks[track.id].playlists.push(
+              playlistBody.playlistInformation,
+            )
+          } else {
+            duplicateTracks[track.id] = {
+              name: track.name,
+              artist: track.album.artists[0].name, // TODO:  multiple artists
+              playlists: [
+                ...allTracks[track.id],
+                playlistBody.playlistInformation,
+              ],
+            }
+          }
+        } else {
+          allTracks[track.id] = [playlistBody.playlistInformation]
+        }
+      })
+    })
+    return duplicateTracks
+  })
+}
+
+/* TODO:  checkAuthAndRefreshIfNecessary:
+  * Bail with instructions if our CREDENTIALS are malformed or not filled out
+  * Checks for auth recency and will use refresh token if possible
+  * Bonus:  helps folks fill out that first auth object
+*/
+
 module.exports = {
   addTracksToPlaylist,
   elvisTest,
   gauntletIds,
   getPlaylistTracksWithOffset,
+  playlistCollider,
   processPlaylistTracksResponse,
   removeTracksFromPlaylist,
   summarize,
