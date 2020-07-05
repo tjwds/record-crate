@@ -32,7 +32,7 @@ class AuthorizeCommand extends Command {
 
     if (flags.refresh) {
       const refreshBody = await api.refreshAccessToken()
-      accessToken = refreshBody.body.refresh_token
+      accessToken = refreshBody.body.access_token
       refreshToken = CREDENTIALS.refreshToken
     } else {
       const authURL = api.createAuthorizeURL(SCOPES, 'cli-scoping')
