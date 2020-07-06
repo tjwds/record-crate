@@ -148,22 +148,26 @@ const playlistCollider = async playlistIds => {
 }
 
 const refreshToken = async () => {
-  // TODO: only refresh if necessary
-  const refreshBody = await api.refreshAccessToken()
-  const accessToken = refreshBody.body.access_token
-  CREDENTIALS = {
-    ...CREDENTIALS,
-    accessToken,
-  }
-  // write to credentials file
-  fs.writeFileSync(
-    path.join(__dirname, '../credentials.js'),
-    `const CREDENTIALS = ${JSON.stringify(CREDENTIALS)}
+  const nextTime = new Date()
+  nextTime.setHours(nextTime.getHours() - 1)
+  if (!CREDENTIALS.nextTime || nextTime < CREDENTIALS.nextTime) {
+    const refreshBody = await api.refreshAccessToken()
+    const accessToken = refreshBody.body.access_token
+    CREDENTIALS = {
+      ...CREDENTIALS,
+      accessToken,
+      nextTime: new Date(),
+    }
+    // write to credentials file
+    fs.writeFileSync(
+      path.join(__dirname, '../credentials.js'),
+      `const CREDENTIALS = ${JSON.stringify(CREDENTIALS)}
 const gauntletIds = ${JSON.stringify(gauntletIds)}
 
 module.exports = {CREDENTIALS, gauntletIds}
 `
-  )
+    )
+  }
 }
 
 module.exports = {
