@@ -1,7 +1,9 @@
 /* eslint-disable no-console */
 // eslint-disable-next-line import/extensions
 const SpotifyWebApi = require('spotify-web-api-node')
-const {CREDENTIALS, gauntletIds} = require('./credentials.js')
+const fs = require('fs')
+const path = require('path')
+let {CREDENTIALS, gauntletIds} = require('./credentials.js')
 
 const api = new SpotifyWebApi(CREDENTIALS)
 
@@ -145,11 +147,24 @@ const playlistCollider = async playlistIds => {
   })
 }
 
-/* TODO:  checkAuthAndRefreshIfNecessary:
-  * Bail with instructions if our CREDENTIALS are malformed or not filled out
-  * Checks for auth recency and will use refresh token if possible
-  * Bonus:  helps folks fill out that first auth object
-*/
+const refreshToken = async () => {
+  // TODO: only refresh if necessary
+  const refreshBody = await api.refreshAccessToken()
+  const accessToken = refreshBody.body.access_token
+  CREDENTIALS = {
+    ...CREDENTIALS,
+    accessToken,
+  }
+  // write to credentials file
+  fs.writeFileSync(
+    path.join(__dirname, '../credentials.js'),
+    `const CREDENTIALS = ${JSON.stringify(CREDENTIALS)}
+const gauntletIds = ${JSON.stringify(gauntletIds)}
+
+module.exports = {CREDENTIALS, gauntletIds}
+`
+  )
+}
 
 module.exports = {
   addTracksToPlaylist,
@@ -158,6 +173,7 @@ module.exports = {
   getPlaylistTracksWithOffset,
   playlistCollider,
   processPlaylistTracksResponse,
+  refreshToken,
   removeTracksFromPlaylist,
   summarize,
 }
