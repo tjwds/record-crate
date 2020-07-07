@@ -4,6 +4,7 @@ const {
   gauntletIds,
   getPlaylistTracksWithOffset,
   processPlaylistTracksResponse,
+  refreshToken,
   removeTracksFromPlaylist,
 } = require('../spotify-transact')
 
@@ -16,6 +17,7 @@ class MoveCommand extends Command {
     if (!(from > -1) || !(to > -1) || !(album > -1)) {
       this.error('We need a from and to location, as well as an album number')
     }
+    await refreshToken()
     const fromBody = await getPlaylistTracksWithOffset(gauntletIds[from])
     const albumSummaries = await processPlaylistTracksResponse(fromBody)
     const albumSummary = albumSummaries[album]

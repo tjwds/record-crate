@@ -5,6 +5,7 @@ const {cli} = require('cli-ux')
 const fs = require('fs')
 const path = require('path')
 let {CREDENTIALS, gauntletIds} = require('../credentials')
+const {refreshToken} = require('../spotify-transact')
 
 const SCOPES = [
   'user-read-playback-state',
@@ -27,13 +28,9 @@ class AuthorizeCommand extends Command {
     const {flags} = this.parse(AuthorizeCommand)
     // open the browser with the API route
     const api = new SpotifyWebApi(CREDENTIALS)
-    let accessToken
-    let refreshToken
 
     if (flags.refresh) {
-      const refreshBody = await api.refreshAccessToken()
-      accessToken = refreshBody.body.access_token
-      refreshToken = CREDENTIALS.refreshToken
+      await refreshToken()
     } else {
       const authURL = api.createAuthorizeURL(SCOPES, 'cli-scoping')
       open(authURL)
@@ -42,26 +39,25 @@ class AuthorizeCommand extends Command {
 This will redirect you to joewoods.dev, with a "code" in the query parameters.  Please input that code`)
 
       const grantBody = await api.authorizationCodeGrant(tokenCode)
+      const accessToken = grantBody.body.access_token
+      const refreshAccessToken = grantBody.body.refresh_token
 
-      accessToken = grantBody.body.access_token
-      refreshToken = grantBody.body.refresh_token
-    }
-
-    CREDENTIALS = {
-      ...CREDENTIALS,
-      accessToken,
-      refreshToken,
-    }
-
-    // write to credentials file
-    fs.writeFileSync(
-      path.join(__dirname, '../credentials.js'),
-      `const CREDENTIALS = ${JSON.stringify(CREDENTIALS)}
+      CREDENTIALS = {
+        ...CREDENTIALS,
+        accessToken,
+        refreshToken: refreshAccessToken,
+      }
+      // write to credentials file
+      fs.writeFileSync(
+        path.join(__dirname, '../credentials.js'),
+        `const CREDENTIALS = ${JSON.stringify(CREDENTIALS)}
 const gauntletIds = ${JSON.stringify(gauntletIds)}
 
 module.exports = {CREDENTIALS, gauntletIds}
-`
-    )
+  `
+      )
+    }
+
     this.log('🕺🏻 great job.')
   }
 }

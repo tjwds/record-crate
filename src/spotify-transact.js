@@ -170,6 +170,10 @@ module.exports = {CREDENTIALS, gauntletIds}
   }
 }
 
+// TODO:  playEligibleGauntletAlbum
+// TODO:  "get ready to advance this one" command
+// TODO:  …or, auto-advance mode!!
+
 module.exports = {
   addTracksToPlaylist,
   elvisTest,
